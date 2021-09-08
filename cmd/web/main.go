@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"go-todo/pkg/models"
 	"log"
 	"net/http"
 	"os"
@@ -31,4 +32,5 @@ func main() {
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	TodoList *models.TodoList
 }
