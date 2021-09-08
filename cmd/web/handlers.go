@@ -73,11 +73,27 @@ func (app *application) delete(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Запись успешно удалена"))
 }
 
-func update(w http.ResponseWriter, r *http.Request) {
+func (app *application) update(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Обновить задачу"))
+
+	title := r.URL.Query().Get("title")
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+
+	if err != nil {
+		app.errorLog.Fatal(err)
+		return
+	}
+
+	id, title, err = app.TodoList.Update(id, title)
+
+	if err != nil {
+		app.errorLog.Fatal(err)
+		return
+	}
+
+	fmt.Fprintf(w, "id: %v, title: %v", id, title)
 }

@@ -57,3 +57,19 @@ func (t *TodoModel) Delete(id int) error {
 
 	return nil
 }
+
+func (t *TodoModel) Update(id int, title string) (int, string, error) {
+	sqlQuery := `
+		UPDATE public.todo
+		SET title = $1
+		WHERE id = $2
+		returning id, title`
+	var todoId int
+	var todoTitle string
+	err := t.DB.QueryRow(sqlQuery, title, id).Scan(&todoId, &todoTitle)
+
+	if err != nil {
+		return 0, "", err
+	}
+	return todoId, todoTitle, nil
+}

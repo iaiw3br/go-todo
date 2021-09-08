@@ -10,7 +10,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/todo/create", app.create)
 	mux.HandleFunc("/todo/delete", app.delete)
-	mux.HandleFunc("/todo/update", update)
+	mux.HandleFunc("/todo/update", app.update)
 
 	return mux
 }
