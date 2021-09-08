@@ -1,8 +1,11 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -18,22 +21,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Домашнаяя страница"))
 }
 
-func showAll(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.Header().Set("Allow", http.MethodGet)
-		http.NotFound(w, r)
-		return
-	}
-	w.Write([]byte("Показать задачи"))
-}
-
 func create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.NotFound(w, r)
 		return
 	}
+	id := r.URL.Query().Get("id")
 	w.Write([]byte("Создать задачу"))
+	fmt.Println("id", id)
 }
 
 func delete(w http.ResponseWriter, r *http.Request) {
@@ -56,15 +52,27 @@ func update(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/todo", showAll)
-	mux.HandleFunc("/todo/create", create)
-	mux.HandleFunc("/todo/delete", delete)
-	mux.HandleFunc("/todo/update", update)
+	localAddress := flag.String("localAddress", ":8080", "Адрес веб-сервиса")
+	errLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	log.Println("Сервер запущен")
+	app := application{
+		errorLog: errLog,
+		infoLog:  infoLog,
+	}
 
-	err := http.ListenAndServe(":8080", mux)
-	log.Fatal(err)
+	server := http.Server{
+		Addr:     *localAddress,
+		ErrorLog: errLog,
+		Handler:  app.routes(),
+	}
+
+	infoLog.Println("Сервер запущен")
+	err := server.ListenAndServe()
+	errLog.Fatal(err)
+}
+
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
 }
