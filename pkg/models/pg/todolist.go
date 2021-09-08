@@ -32,3 +32,16 @@ func (t *TodoModel) GetAll() ([]*models.TodoList, error) {
 
 	return todos, nil
 }
+
+func (t *TodoModel) Create(title string, isCompleted bool) (int, error) {
+	sqlQuery := `
+		INSERT INTO public.todo (title, isCompleted) 
+		VALUES($1, $2) 
+		returning id`
+	var id int
+	err := t.DB.QueryRow(sqlQuery, title, isCompleted).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}

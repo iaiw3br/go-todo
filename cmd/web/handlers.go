@@ -29,15 +29,25 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func create(w http.ResponseWriter, r *http.Request) {
+func (app *application) create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.NotFound(w, r)
 		return
 	}
-	id := r.URL.Query().Get("id")
-	w.Write([]byte("Создать задачу"))
-	fmt.Println("id", id)
+	title := r.URL.Query().Get("title")
+	isCompletedStr := r.URL.Query().Get("isCompleted")
+	var isCompleted bool
+	if isCompletedStr == "true" {
+		isCompleted = true
+	} else {
+		isCompleted = false
+	}
+	id, err := app.TodoList.Create(title, isCompleted)
+	if err != nil {
+		app.errorLog.Fatal(err)
+	}
+	fmt.Fprintf(w, string(rune(id)))
 }
 
 func delete(w http.ResponseWriter, r *http.Request) {
