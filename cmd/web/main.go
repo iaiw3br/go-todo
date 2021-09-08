@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	_ "github.com/lib/pq"
-	"go-todo/pkg/models"
+	"go-todo/pkg/models/pg"
 	"log"
 	"net/http"
 	"os"
@@ -28,6 +28,7 @@ func main() {
 	app := application{
 		errorLog: errLog,
 		infoLog:  infoLog,
+		TodoList: &pg.TodoModel{DB: db},
 	}
 
 	server := http.Server{
@@ -44,7 +45,7 @@ func main() {
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
-	TodoList *models.TodoList
+	TodoList *pg.TodoModel
 }
 
 func openDB(connectionToDB string) (*sql.DB, error) {

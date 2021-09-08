@@ -5,17 +5,28 @@ import (
 	"net/http"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.NotFound(w, r)
 		return
 	}
+
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Домашнаяя страница"))
+
+	todos, err := app.TodoList.GetAll()
+
+	if err != nil {
+		app.errorLog.Fatal(err)
+		return
+	}
+
+	for _, todo := range todos {
+		fmt.Fprintf(w, "%v\n", todo)
+	}
 }
 
 func create(w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,7 @@ import (
 func (app *application) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", home)
+	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/todo/create", create)
 	mux.HandleFunc("/todo/delete", delete)
 	mux.HandleFunc("/todo/update", update)
