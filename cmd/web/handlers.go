@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -50,14 +51,26 @@ func (app *application) create(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(rune(id)))
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+func (app *application) delete(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		w.Header().Set("Allow", http.MethodDelete)
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Создать задачу"))
-	w.Write([]byte("Удалить задачу"))
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+
+	if err != nil {
+		app.errorLog.Fatal(err)
+		return
+	}
+
+	err = app.TodoList.Delete(id)
+
+	if err != nil {
+		app.errorLog.Fatal(err)
+		return
+	}
+	w.Write([]byte("Запись успешно удалена"))
 }
 
 func update(w http.ResponseWriter, r *http.Request) {

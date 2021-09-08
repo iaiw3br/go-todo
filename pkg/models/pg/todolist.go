@@ -45,3 +45,15 @@ func (t *TodoModel) Create(title string, isCompleted bool) (int, error) {
 	}
 	return id, nil
 }
+
+func (t *TodoModel) Delete(id int) error {
+	sqlQuery := `DELETE FROM public.todo WHERE id = $1`
+
+	_, err := t.DB.Exec(sqlQuery, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
