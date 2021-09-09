@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"go-todo/pkg/models/pg"
 	"log"
@@ -11,10 +12,26 @@ import (
 )
 
 func main() {
-	localAddress := flag.String("localAddress", ":8080", "Адрес веб-сервиса")
 	errLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime|log.Lshortfile)
-	connectionToDB := "postgres://postgres:postgres@localhost/go-todolist?sslmode=disable"
+	port, err := getEnvVariable("PORT")
+	if err != nil {
+		errLog.Fatal(err)
+	}
+	pgName, err := getEnvVariable("POSTGRES_NAME")
+	if err != nil {
+		errLog.Fatal(err)
+	}
+	pgPassword, err := getEnvVariable("POSTGRES_PASSWORD")
+	if err != nil {
+		errLog.Fatal(err)
+	}
+	pgDatabase, err := getEnvVariable("POSTGRES_DATABASE")
+	if err != nil {
+		errLog.Fatal(err)
+	}
+	localAddress := flag.String("localAddress", ":"+port, "Адрес веб-сервиса")
+	connectionToDB := "postgres://" + pgName + ":" + pgPassword + "@localhost/" + pgDatabase + "?sslmode=disable"
 
 	db, err := openDB(connectionToDB)
 
@@ -61,4 +78,14 @@ func openDB(connectionToDB string) (*sql.DB, error) {
 	}
 
 	return db, err
+}
+
+func getEnvVariable(key string) (string, error) {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		return "", err
+	}
+
+	return os.Getenv(key), nil
 }
